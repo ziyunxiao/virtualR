@@ -19,7 +19,7 @@ print(paste("Global Library Path:", global_lib, sep = ""))
 
 # function to install packages required by this tool
 install_mininum_packages <- function() {
-  x <- c('dplyr', 'optparse','devtools','withr')
+  x <- c('dplyr', 'optparse', 'devtools', 'withr')
   installed_packages = rownames(installed.packages())
   for (p in x) {
     if (p %in% installed_packages == FALSE) {
@@ -35,11 +35,11 @@ library(dplyr)
 library(stringr)
 
 install_global_packages <- function() {
-  global_packages_required = c('dplyr','shiny','stringr')
-  if (file.exists("global_packages.txt")){
+  global_packages_required = c('dplyr', 'shiny', 'stringr')
+  if (file.exists("global_packages.txt")) {
     global_packages_required = readLines('global_packages.txt')
   }
-  
+
   installed_packages = rownames(installed.packages())
 
   for (p in global_packages_required) {
@@ -69,17 +69,23 @@ export R_LIBS="`pwd`/lib/vendor":$R_LIBS
   }
 
   # create global_packages.txt  
-  if (! file.exists("global_packages.txt")){
-    global_packages_required = c('dplyr','ggplot2','stringr')
-    writeLines(global_packages_required,'global_packages.txt')
+  if (!file.exists("global_packages.txt")) {
+    global_packages_required = c('dplyr', 'ggplot2', 'stringr')
+    writeLines(global_packages_required, 'global_packages.txt')
   }
 
   # write to .gitignore
-  if (! file.exists('.gitignore')){
-    x = c('lib/vendor','.vscode')
-    writeLines(x,'.gitignore')
-  }else{
-
+  if (!file.exists('.gitignore')) {
+    x = c('#virtual R ignore', 'lib/vendor', '.vscode')
+    writeLines(x, '.gitignore')
+  } else {
+    y = readLines('.gitignore')
+    if (!'lib/vendor' %in% y) {
+      x = c('#virtual R ignore', 'lib/vendor', '.vscode')
+      write(x,file = '.gitignore', append =  TRUE)
+    }else{
+      print(paste(".gitignore exists and includes lib/vendor already"))
+    }
   }
 
 }
@@ -105,7 +111,7 @@ freeze_package <- function(file_name) {
 # A comparison operator and a version, e.g. ">= 0.1.12"
 # Several criteria to satisfy, as a comma-separated string, e.g. ">= 1.12.0, < 1.14"
 # Several criteria to satisfy, as elements of a character vector, e.g. c(">= 1.12.0", "< 1.14")
-restore_requirements <- function(file_name) {
+restore_requirements <- function(file_name, enforce=TRUE) {
   library(devtools)
   df <- read.csv(file = file_name)
 
@@ -123,18 +129,25 @@ restore_requirements <- function(file_name) {
     if (p %in% rownames(cdf)) {
       print(paste("Package", p, "already exists"))
     } else {
-      print(c(p, v))      
+      print(c(p, v))
       # install the package
-      matched = str_match(v,">|<|=")
-      if ( !is.na(matched[1])){
+      matched = str_match(v, ">|<|=")
+      if (!is.na(matched[1])) {
         # version must equal to       
-        withr::with_libpaths(new = my_lib,  
+        withr::with_libpaths(new = my_lib,
           install_version(p, version = v, repos = "http://cran.us.r-project.org")
         )
-      }else{
-        # default install latest version
-        install.packages(p, lib = my_lib)
-      }      
+      } else {        
+        if (!enforce){
+          # install latest version
+          install.packages(p, lib = my_lib)        
+        }else{
+          # install exact version
+          withr::with_libpaths(new = my_lib,
+            install_version(p, version = v, repos = "http://cran.us.r-project.org")
+          )
+        }
+      }
     }
   }
 }
@@ -149,8 +162,6 @@ library("optparse")
 option_list = list(
   make_option(c("-i", "--install_package"), type = "character", default = NULL,
               help = "package name to install", metavar = "character"),
-  make_option(c("-e", "--enforce_version"), type = "logical", action = "store_true", default = FALSE,
-              help = "package version enforced to install.", metavar = "character"),
   make_option(c("-f", "--freeze"), type = "logical", action = "store_true", default = FALSE,
               help = "output local lib packages to requirements.txt", metavar = "character"),
   make_option(c("--freeze_file"), type = "character", action = "store_true", default = "requirements.txt",
@@ -159,6 +170,8 @@ option_list = list(
               help = "Install global required packages for shiny development ", metavar = "character"),
   make_option(c("-r", "--restore"), type = "logical", action = "store_true", default = FALSE,
               help = "restore packages from requirements.txt to local lib", metavar = "character"),
+  make_option(c("--enforce_version"), type = "logical", action = "store_true", default = TRUE,
+              help = "package version enforced to install.", metavar = "character"),
   make_option(c("--init"), type = "logical", action = "store_true", default = FALSE,
               help = "create setenv.sh", metavar = "character")
 );
@@ -171,7 +184,7 @@ if (is.character(opt$install_package)) {
 } else if (opt$freeze) {
   freeze_package(opt$freeze_file)
 } else if (opt$restore) {
-  restore_requirements(opt$freeze_file)
+  restore_requirements(opt$freeze_file, opt$enforce_version)
 } else if (opt$install_global) {
   install_global_packages()
 } else if (opt$init) {

@@ -41,3 +41,6 @@ vignettes/*.pdf
 # virtualR ignore
 lib/vendor/
 .vscode/
+#virtual R ignore
+lib/vendor
+.vscode
