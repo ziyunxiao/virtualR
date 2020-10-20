@@ -37,3 +37,7 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+
+# virtualR ignore
+lib/vendor/
+.vscode/
