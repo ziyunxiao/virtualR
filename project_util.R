@@ -36,6 +36,10 @@ library(stringr)
 
 install_global_packages <- function() {
   global_packages_required = c('dplyr','shiny','stringr')
+  if (file.exists("global_packages.txt")){
+    global_packages_required = readLines('global_packages.txt')
+  }
+  
   installed_packages = rownames(installed.packages())
 
   for (p in global_packages_required) {
@@ -50,6 +54,7 @@ install_global_packages <- function() {
 
 # function to create setenv.sh
 init_setenv <- function() {
+  # create setenv.sh
   if (file.exists("./setenv.sh")) {
     print(paste("setenv.sh already exists"))
   } else {
@@ -62,6 +67,21 @@ export R_LIBS="`pwd`/lib/vendor":$R_LIBS
     print("setenv.sh is created")
     system("chmod +x setenv.sh")
   }
+
+  # create global_packages.txt  
+  if (! file.exists("global_packages.txt")){
+    global_packages_required = c('dplyr','ggplot2','stringr')
+    writeLines(global_packages_required,'global_packages.txt')
+  }
+
+  # write to .gitignore
+  if (! file.exists('.gitignore')){
+    x = c('lib/vendor','.vscode')
+    writeLines(x,'.gitignore')
+  }else{
+
+  }
+
 }
 
 
