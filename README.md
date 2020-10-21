@@ -79,9 +79,15 @@ parameter --enforce_version TRUE|FALSE default TRUE This parameter controlsl if 
 
 e.g.
 ```
+# use default requirements.txt and force to exact version for lines like "zoo", "1.0.1"
+
 virtual.R -r 
 
+# this command will restore libraries and use >= other than exact numbers for lines like "zoo", "1.0.1"
+
 virtual.R -r --enforce_version FALSE
+
+# use none default file to restore
 
 virtual.R -f --freeze_file t1.txt
 ```
