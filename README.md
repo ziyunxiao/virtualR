@@ -1,10 +1,10 @@
 # virtual.R
-Utilities to manage project level R library. It is used to get something like Python virtual env.
+Utilities to manage project level R library. It is used to achieve something like Python virtual env.
 This project is developed under Linux (Ubuntu), you might need adjust some PATH settings if you are not on Linux.
 
 ## How does it work 
 This utility will create a folder, ./lib/vendor, in project folder.
-This folder will be the project level library.
+This folder will be the project level library. And this folder will be added to .gitignore file
 
 The original default Libraries will be referenced as gloabl libraries. The utility only uses the top one, the library under current user. And other libraries at root level won't be touched.
 
@@ -12,11 +12,12 @@ The utility has a few commands which will manage the project and libraries for y
 
 # Install
 1. download project_util.R to ~/bin
-2. give execute permission `chmod +x ~/bin/project_util.R`
+2. give execute permission `chmod +x ~/bin/virtual.R`
 3. Add ~/bin to your PATH in .bashrc `export PATH=~/bin:$PATH`
 4. create a alias to something shorter in your .bashrc(optional). e.g. `alias virtualr`
 
 # Usage
+
 ## Create your R project
 You will create your R project with your normal procedure.
 
@@ -25,17 +26,17 @@ Go into your project folder and
 run `virtual.R --init`
 
 This command will create or modify a few scripts in your project folder.
-1. setenv.sh
+1. setenv.sh (set R_LIBS variable)
 2. .gitignore (add ignore folders)
-3. global_packages.txt
-4. requiremetns.txt (example only)
+3. global_packages.txt (Common pacages for mulitple projects)
+4. requiremetns.txt (project level pacakges. You need maintain this file during development process)
 
 ### setenv.sh
 this script need be called when you start to development. It will set R_LIBS in environment and add ./lib/vendor to the library paths.
 
-you need run `. setenv.sh` before you start any R sessions. e.g. in command line, or start R studio. 
+you need run `. setenv.sh` before you start any R sessions for your project development. e.g. in command line, or start R studio. 
 
-to start R studio, you can type `rstudio` after calling `. setenv.sh`. If you open R studio from Menu, proejct level library won't take effect.
+to start R studio, you can type `rstudio` after calling `. setenv.sh`. If you open R studio from system Menu, the proejct level library won't take effect.
 
 to start VS code, type `code` after calling `.setenv.sh`
 
@@ -51,15 +52,17 @@ e.g.
 "","Version"
 "curl","4.3"
 "quantmod",">= 0.4.0"
-"TTR","0.24.2"
+"TTR",">= 0.24.2, < 1.0.0"
 "xts","0.12.1"
 "zoo","1.8-8"
 ```
-Version of the package to install. Can either be a string giving the exact version required, or a specification in the same format as the parenthesized expressions used in package dependencies. One of the following formats:
+Version: the package version to install. Can either be a string giving the exact version required, or a specification in the same format as the parenthesized expressions used in package dependencies. One of the following formats:
 1. An exact version required, as a string, e.g. "0.1.13"
 2. A comparison operator and a version, e.g. ">= 0.1.12"
 3. Several criteria to satisfy, as a comma-separated string, e.g. ">= 1.12.0, < 1.14"
 4. Several criteria to satisfy, as elements of a character vector, e.g. c(">= 1.12.0", "< 1.14")
+
+**Pay attention to the space before version when you use comparision operator.**
 
 ## Usage druring project development
 
@@ -75,7 +78,7 @@ virtual.R -f --freeze_file t1.txt
 ## restore
 use this command after you clone your project. the default file is requirements.txt.
 
-parameter --enforce_version TRUE|FALSE default TRUE This parameter controlsl if you need enforce to exact version number or not. By default freeze command will generate libraries with version. Without modifying it, the restore command will restore with exact version number. But if you want use >= with version number other than modify the requirements.txt, you can give this parameter with FALSE.
+parameter --enforce_version TRUE|FALSE. The default value is TRUE. This parameter controlsl if you need enforce to exact version number or not. By default freeze command will generate libraries with version. Without modifying it, the restore command will restore with exact version number. But if you want use >= with version number other than modify the requirements.txt, you can give this parameter with FALSE.
 
 e.g.
 ```
@@ -94,8 +97,10 @@ virtual.R -f --freeze_file t1.txt
 
 In case you are missing some libraries in global libraries, run `virtual.R -g`
 
-## install package by using this utility
-`virtual.R -i <package_name>`
+## install package to project level library
+Run `virtual.R -i <package_name>`
+
+You can also use install.packages() to isntall as long as you source setenv.sh before you start the R session.
 
 
 
