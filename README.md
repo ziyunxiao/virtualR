@@ -37,7 +37,7 @@ you need run `. setenv.sh` before you start any R sessions. e.g. in command line
 
 to start R studio, you can type `rstudio` after calling `. setenv.sh`. If you open R studio from Menu, proejct level library won't take effect.
 
-to start VS code, type `code` after calling `.setenv.sh`
+to start VS code, type `code` after calling `. setenv.sh`
 
 ### global_packages.txt
 This file is used when you developing multiple similiar projects and they are sharing common libraries and you want to save some space and install time for the project.
@@ -89,7 +89,7 @@ virtual.R -r --enforce_version FALSE
 
 # use none default file to restore
 
-virtual.R -f --freeze_file t1.txt
+virtual.R -r --freeze_file t1.txt
 ```
 
 In case you are missing some libraries in global libraries, run `virtual.R -g`
